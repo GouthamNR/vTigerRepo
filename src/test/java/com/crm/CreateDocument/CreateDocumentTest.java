@@ -1,35 +1,38 @@
 package com.crm.CreateDocument;
 
-import java.io.FileInputStream;
-import java.time.Duration;
-import java.util.Properties;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+
+import com.crm.sdet37.GenericUtility.FileUtility;
+import com.crm.sdet37.GenericUtility.JavaUtility;
+import com.crm.sdet37.GenericUtility.WebDriverUtility;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class CreateDocumentTest {
 public static void main(String[] args) throws Throwable {
 	//to read the data from properties file.
-	FileInputStream fis = new FileInputStream("./src/test/resources/Vtiger.properties.txt");
-	Properties properties = new Properties();
-	properties.load(fis);
-	String Vurl = properties.getProperty("url");
-	String userName = properties.getProperty("userName");
-	String password = properties.getProperty("password");
+	JavaUtility jLib = new JavaUtility();
+	//ExcelUtility eLib = new ExcelUtility();
+	FileUtility fLib = new FileUtility();
+	WebDriverUtility wLib = new WebDriverUtility();
+	String URL = fLib.getProperty("url");
+	String userName = fLib.getProperty("userName");
+	String password = fLib.getProperty("password");	
+	int ranNum = jLib.getRandumNum();
+	String docName = "doc"+ranNum;
 	//to set driver executable path.
 	WebDriverManager.chromedriver().setup();
 	//to instantiate the Chrome driver.
 	WebDriver driver = new ChromeDriver();
 	//to maximize the window.
-	driver.manage().window().maximize();
+	wLib.maximizeWindow(driver);
 	//to provide waiting time to elements.
-	driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+	wLib.waitUntilPageGetsLoad(driver);
 	//to enter the url in search field.
-	driver.get(Vurl);
+	driver.get(URL);
 	//to enter user name in user name text field.
 	WebElement usernameTextField = driver.findElement(By.name("user_name"));
 	usernameTextField.clear();
@@ -45,7 +48,6 @@ public static void main(String[] args) throws Throwable {
 	//to click on create Document icon.
 	driver.findElement(By.xpath("//img[@title='Create Document...']")).click();
 	//to enter document name in Document name text field.
-	String docName = "doc1";
 	driver.findElement(By.name("notes_title")).sendKeys(docName);
 	//to select a file from computer.
 	driver.findElement(By.name("filename")).sendKeys("C:/Users/DELL/Desktop/VtigerAutomation.txt");

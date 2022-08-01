@@ -1,26 +1,29 @@
 package com.crm.CreateEmail;
 
-import java.io.FileInputStream;
-import java.time.Duration;
-import java.util.Properties;
-import java.util.Set;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+
+import com.crm.sdet37.GenericUtility.ExcelUtility;
+import com.crm.sdet37.GenericUtility.FileUtility;
+import com.crm.sdet37.GenericUtility.JavaUtility;
+import com.crm.sdet37.GenericUtility.WebDriverUtility;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class CreateEmailTest {
 	public static void main(String[] args) throws Throwable  {
 		//to read the data from properties file.
-		FileInputStream fis = new FileInputStream("./src/test/resources/Vtiger.properties.txt");
-		Properties properties = new Properties();
-		properties.load(fis);
-		String Vurl = properties.getProperty("url");
-		String userName = properties.getProperty("userName");
-		String password = properties.getProperty("password");
+		JavaUtility jLib = new JavaUtility();
+		ExcelUtility eLib = new ExcelUtility();
+		FileUtility fLib = new FileUtility();
+		WebDriverUtility wLib = new WebDriverUtility();
+		String URL = fLib.getProperty("url");
+		String userName = fLib.getProperty("userName");
+		String password = fLib.getProperty("password");	
+		int ranNum = jLib.getRandumNum();
+		String contactName = eLib.getCellvalue("Contact", 1, 0);
 		
 		//to set driver executable path.
 		WebDriverManager.chromedriver().setup();
@@ -29,13 +32,13 @@ public class CreateEmailTest {
 		WebDriver driver = new ChromeDriver();
 		
 		//to maximize the window.
-		driver.manage().window().maximize();
+		wLib.maximizeWindow(driver);
 		
 		//to provide waiting time to elements.
-		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		wLib.waitUntilPageGetsLoad(driver);
 		
 		//to enter the url in search field.
-		driver.get(Vurl);
+		driver.get(URL);
 		
 		//to enter user name in user name text field.
 		WebElement usernameTextField = driver.findElement(By.name("user_name"));
@@ -57,15 +60,7 @@ public class CreateEmailTest {
 		driver.findElement(By.linkText("Compose")).click();
 		
 		//to get all window ID's currently active.
-		Set<String> windows = driver.getWindowHandles();
-		for (String window : windows) {
-			//to switch to the email&action window.
-			driver.switchTo().window(window);
-			String url = driver.getCurrentUrl();
-			if (url.contains("Emails&action")) {
-				driver.switchTo().window(window);
-			}
-		}
+		wLib.switchToWindowUsingUrl(driver, "Emails&action=EmailsAjax&file");
 		
 		//to verify driver control.
 		System.out.println(driver.getCurrentUrl());
@@ -74,39 +69,26 @@ public class CreateEmailTest {
 		driver.findElement(By.xpath("//img[@src='themes/softed/images/select.gif']")).click();
 		
 		//to get all window ID's currently active.
-		Set<String> newWindows = driver.getWindowHandles();
-		for (String window1 : newWindows) {
-			//to switch to the contact&action window.
-			driver.switchTo().window(window1);
-			String url = driver.getCurrentUrl();
-			if (url.contains("Contacts&action")) {
-				driver.switchTo().window(window1);
-				break;
-			}
-		}
+		wLib.switchToWindowUsingUrl(driver, "Contacts&action");
 		
 		//to verify driver control.
 		System.out.println(driver.getCurrentUrl());
 		
 		//to select contact from contact&action window.
-		String contactName = "ggg gowda";
+		
 		driver.findElement(By.linkText(contactName)).click();
 		
-		//to get all window ID's currently active.q
-		Set<String> allwindows = driver.getWindowHandles();
-		for (String window2 : allwindows) {
-			//to switch back to parent window.
-			driver.switchTo().window(window2);
-		}
+		//to get all window ID's currently active.
+		wLib.switchToWindowUsingUrl(driver, "Emails&action=EmailsAjax&file");
 		
 		//to verify driver control.
 		System.out.println(driver.getCurrentUrl());
 		
 		//to enter email address in cc text field.
-		driver.findElement(By.name("ccmail")).sendKeys("goutham@gmail.com");
+		driver.findElement(By.name("ccmail")).sendKeys("goutham"+ranNum+"@gmail.com");
 		
 		//to enter email address in bcc text field.
-		driver.findElement(By.name("bccmail")).sendKeys("goutham@gmail.com");
+		driver.findElement(By.name("bccmail")).sendKeys("goutham"+ranNum+"@gmail.com");
 		
 		//to enter subject in subject text field.
 		driver.findElement(By.id("subject")).sendKeys("no subject");

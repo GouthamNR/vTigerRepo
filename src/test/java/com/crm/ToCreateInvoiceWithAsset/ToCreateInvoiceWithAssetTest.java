@@ -1,50 +1,40 @@
 package com.crm.ToCreateInvoiceWithAsset;
 
-import java.io.FileInputStream;
-import java.time.Duration;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
 
+import com.crm.sdet37.GenericUtility.ExcelUtility;
+import com.crm.sdet37.GenericUtility.FileUtility;
+import com.crm.sdet37.GenericUtility.JavaUtility;
+import com.crm.sdet37.GenericUtility.WebDriverUtility;
+
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class ToCreateInvoiceWithAssetTest{
 public static void main(String[] args) throws Throwable {
 	//to read the data from properties file.
-	FileInputStream fis = new FileInputStream("./src/test/resources/Vtiger.properties.txt");
-	Properties properties = new Properties();
-	properties.load(fis);
-	String Vurl = properties.getProperty("url");
-	String userName = properties.getProperty("userName");
-	String password = properties.getProperty("password");
+	JavaUtility jLib = new JavaUtility();
+	ExcelUtility eLib = new ExcelUtility();
+	FileUtility fLib = new FileUtility();
+	WebDriverUtility wLib = new WebDriverUtility();
+	String URL = fLib.getProperty("url");
+	String userName = fLib.getProperty("userName");
+	String password = fLib.getProperty("password");	
+	int ranNum = jLib.getRandumNum();
 	
 	//to read the data from the excel file.
-	FileInputStream fisExcel = new FileInputStream("./src/test/resources/VTigerTestData.xlsx");
-	Workbook workBook = WorkbookFactory.create(fisExcel);
-	Sheet sheet = workBook.getSheet("Asset");
-	Row row = sheet.getRow(2);
-	Cell cell = row.getCell(0);
-	String AssetNo = cell.getStringCellValue();
-	Row row1 = sheet.getRow(2);
-	Cell cell1 = row1.getCell(1);
-	String SerialNumber  = cell1.getStringCellValue();
-	Row row2 = sheet.getRow(2);
-	Cell cell2 = row2.getCell(2);
-	String AssetName  = cell2.getStringCellValue();
-	Row row3 = sheet.getRow(2);
-	Cell cell3 = row3.getCell(3);
-	String ShippingMethod   = cell3.getStringCellValue();
+	String AssetNo = eLib.getCellvalue("Asset", 2, 0);
+	String SerialNumber = eLib.getCellvalue("Asset", 2, 1);
+	String AssetName = eLib.getCellvalue("Asset", 2, 2);
+	String ShippingMethod = eLib.getCellvalue("Asset", 2, 3);
+	String invoiceName = "invoice1";
+	String customerName = "dddd";
 	
 	// to set driver executable path.
 	WebDriverManager.chromedriver().setup();
@@ -53,13 +43,13 @@ public static void main(String[] args) throws Throwable {
 	WebDriver driver=new ChromeDriver();
 	
 	//to maximize browser.
-	driver.manage().window().maximize();
+	wLib.maximizeWindow(driver);
 	
 	// to give implicit wait to web elements.
-	driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+	wLib.waitUntilPageGetsLoad(driver);
 	
 	//to pass url to browser.
-	driver.get(Vurl);
+	driver.get(URL);
 	
 	//to pass user name to user name text field.
 	WebElement usernameTextField = driver.findElement(By.name("user_name"));
@@ -76,9 +66,8 @@ public static void main(String[] args) throws Throwable {
 	
 	//to click on More link in Vtiger Home page.
 	WebElement more = driver.findElement(By.xpath("//a[.='More']"));
-	Actions action = new Actions(driver);
-	action.moveToElement(more).perform();
-	
+	wLib.mouseOverOnElement(driver, more);
+
 	//to click on asset link in More.
 	driver.findElement(By.name("Assets")).click();
 	
@@ -98,130 +87,48 @@ public static void main(String[] args) throws Throwable {
 	Set<String> allwindows = driver.getWindowHandles();
 	
 	//to access	individual window.
-	for (String wId : allwindows) {
-		
-		//to switch to windows.
-		driver.switchTo().window(wId);
-		//to get url of window currently under control.
-		String url = driver.getCurrentUrl();
-		
-		//to switch to the Invoice&action window.
-		if (url.contains("Invoice&action")) {
-			driver.switchTo().window(wId);
-			break;
-		}
-	}
+	wLib.switchToWindowUsingUrl(driver, "Invoice&action");
+
 	
 	//to select invoice particular invoice from Invoice&action window.
-	String invoiceName = "invoice1";
+	
 	driver.findElement(By.linkText(invoiceName)).click();
 	
 	//to get all currently active window Id's.
-	Set<String> allwindows1 = driver.getWindowHandles();
-	
-	//to access	individual window.
-	for (String wId : allwindows1) {
-		
-		//to switch to windows
-		driver.switchTo().window(wId);
-		
-		//to get url of window currently under control.
-		String url = driver.getCurrentUrl();
-		
-		//to switch to the Assets&action window.
-		if (url.contains("Assets&action")) {
-			driver.switchTo().window(wId);
-			break;
-		}
-	}
+	wLib.switchToWindowUsingUrl(driver, "Assets&action");
+
 	
 	//to click on customer name lookup image.
 	driver.findElement(By.xpath("//input[@id='account']/..//img[@src='themes/softed/images/select.gif']")).click();
 	
 	//to get all currently active window Id's.
-	Set<String> allwindows2 = driver.getWindowHandles();
-	//to access	individual window.
-	for (String wId : allwindows2) {
-		
-		//to switch to windows
-		driver.switchTo().window(wId);
-		
-		//to get url of window currently under control.
-		String url = driver.getCurrentUrl();
-		
-		//to switch to the Accounts&action window.
-		if (url.contains("Accounts&action")) {
-			driver.switchTo().window(wId);
-			break;
-		}
-	}
-	
+	wLib.switchToWindowUsingUrl(driver, "Accounts&action");
+
 	//to select customer name from Accounts&action window.
-	String customerName = "dddd";
 	driver.findElement(By.linkText(customerName)).click();
 	
 	//to get all currently active window Id's.
-	Set<String> allwindows3 = driver.getWindowHandles();
-	
-	//to access	individual window.
-	for (String wId : allwindows3) {
-		//to switch to windows
-		driver.switchTo().window(wId);
-		
-		//to get url of window currently under control.
-		String url = driver.getCurrentUrl();
-	
-		//to switch to the Assets&action window.
-		if (url.contains("Assets&action")) {
-			driver.switchTo().window(wId);
-			break;
-		}
-	}
+	wLib.switchToWindowUsingUrl(driver, "Assets&action");
+//	Set<String> allwindows3 = driver.getWindowHandles();
+//	
+
 	
 	//to click on product name loockup image. 
 	driver.findElement(By.xpath("//input[@id='product']/..//img[@src='themes/softed/images/select.gif']")).click();
 	
 	//to get all currently active window Id's.
-	Set<String> allwindows4 = driver.getWindowHandles();
-	
-	//to access	individual window.
-	for (String wId : allwindows4) {
-		
-		//to switch to windows
-		driver.switchTo().window(wId);
-		
-		//to get url of window currently under control.
-		String url = driver.getCurrentUrl();
-		
-		//to switch to the Products&action window.
-		if (url.contains("Products&action")) {
-			driver.switchTo().window(wId);
-			break;
-		}
-	}
+	wLib.switchToWindowUsingUrl(driver, "Products&action");
+//	Set<String> allwindows4 = driver.getWindowHandles();
+
 	
 	//to select product from Products&action window.
 	String productName = "steel";
 	driver.findElement(By.linkText(productName)).click();
 	
 	//to get all currently active window Id's.
-	Set<String> allwindows5 = driver.getWindowHandles();
-	
-	//to access	individual window.
-	for (String wId : allwindows5) {
-		
-		//to switch to windows
-		driver.switchTo().window(wId);
-		
-		//to get url of window currently under control.
-		String url = driver.getCurrentUrl();
-		
-		//to switch to the Assets&action window.
-		if (url.contains("Assets&action")) {
-			driver.switchTo().window(wId);
-			break;
-		}
-	}
+	wLib.switchToWindowUsingUrl(driver, "Assets&action");
+//	Set<String> allwindows5 = driver.getWindowHandles();
+
 	
 	// to click on calendar lookup image
 	driver.findElement(By.xpath("//input[@name='dateinservice']/..//img[@src='themes/softed/images/btnL3Calendar.gif']")).click();
@@ -234,6 +141,7 @@ public static void main(String[] args) throws Throwable {
 		
 		// to select particular date.
 		if (date.getText().contains("27")) {
+			Actions action = new Actions(driver);
 			action=new Actions(driver);
 			action.moveToElement(date).click(date).click().perform();
 		}

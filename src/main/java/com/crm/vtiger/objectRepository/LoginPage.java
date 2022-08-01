@@ -1,0 +1,34 @@
+package com.crm.vtiger.objectRepository;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+
+public class LoginPage {
+	
+	public LoginPage(WebDriver driver) {
+		PageFactory.initElements(driver, this);
+	}
+@FindBy(name = "user_name") private WebElement userNameTextField;
+@FindBy(name = "user_password") private WebElement passwordTextField;
+@FindBy(id = "submitButton") private WebElement submit;
+
+public WebElement getUserNameTextField() {
+	return userNameTextField;
+}
+public WebElement getPasswordTextField() {
+	return passwordTextField;
+}
+public WebElement getSubmit() {
+	return submit;
+}
+
+public void loginTOApp(String UserName, String Password) {
+	getUserNameTextField().clear();
+	getUserNameTextField().sendKeys(UserName);
+	getPasswordTextField().clear();
+	getPasswordTextField().sendKeys(Password);
+	getSubmit().clear();
+}
+}
